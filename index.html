@@ -1,0 +1,880 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+</head>
+<body>
+<canvas id="canvas" width="240" height="240"></canvas>
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<h1></h1>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+width = canvas.width;
+height = canvas.height;
+fieldSize = 8;
+rectSize = 30;
+radius = 10;
+
+var Rectan = function(x,y,color,empty,i,j){
+	this.x = x;
+	this.y = y;
+	this.color = color;
+	this.empty = empty;
+	this.i = i;
+	this.j = j;
+};
+
+var Trick = function(centerX,centerY,colorTrick,i,j,visible){
+	this.centerX = centerX;
+	this.centerY = centerY;
+	this.colorTrick = colorTrick;
+	this.i = i;
+	this.j = j;
+	this.visible = visible;
+};
+
+var Rects = [];
+for (var i = 0; i < fieldSize; i++){
+	Rects[i]= [];
+	for(var j = 0; j < fieldSize;j++){
+		if((i % 2 == 0 && j % 2 ==0) || (i % 2 != 0 && j % 2 !=0))
+		color = 'White';
+		else color = 'Gray';
+		
+		test = new Rectan(rectSize *j,rectSize*i,color,true,i,j);
+		Rects[i][j] = test;
+		ctx.fillStyle = Rects[i][j].color;
+ctx.fillRect(Rects[i][j].x,Rects[i][j].y,rectSize,rectSize);}}
+var drawRect = function(){
+
+for (var i = 0; i < fieldSize; i++){
+	Rects[i]= [];
+	for(var j = 0; j < fieldSize;j++){
+		if((i % 2 == 0 && j % 2 ==0) || (i % 2 != 0 && j % 2 !=0))
+		color = 'White';
+		else color = 'Gray';
+		
+		test = new Rectan(rectSize *j,rectSize*i,color,true,i,j);
+		Rects[i][j] = test;
+		ctx.fillStyle = Rects[i][j].color;
+		ctx.fillRect(Rects[i][j].x,Rects[i][j].y,rectSize,rectSize);
+	}
+}
+};
+
+drawRect();
+
+var newMapTricksAndRectan = new Map();
+
+var BlackTricks = [];
+for (var i= 0; i < 3; i++){
+	BlackTricks[i] = [];
+	var jTrickBl=0;
+	for(var j = 0; j < fieldSize;j++){
+		if (Rects[i][j].color == 'Gray'){
+			colorTricks = 'Black';
+			trickTest = new Trick(Rects[i][j].x + rectSize/2,Rects[i][j].y + rectSize/2,colorTricks,i,j,true);
+			BlackTricks[i][jTrickBl] = trickTest;
+			ctx.fillStyle = trickTest.colorTrick;
+			ctx.beginPath();
+			ctx.arc(BlackTricks[i][jTrickBl].centerX,BlackTricks[i][jTrickBl].centerY,radius,0, 2 * Math.PI,true);
+			ctx.fill();
+			newMapTricksAndRectan.set(Rects[i][j],BlackTricks[i][jTrickBl]);
+			Rects[i][j].empty = false;
+			jTrickBl++;
+		}
+	}
+}
+
+js = 1;
+sd = 3;
+console.log(BlackTricks[js][sd].centerX);
+var WhiteTricks = [];
+
+for (var i= 5; i < 8; i++){
+	WhiteTricks[i] = [];
+	var jTrick=0;
+	for(var j = 0; j < fieldSize;j++){
+		if (Rects[i][j].color == 'Gray'){
+			colorTricks = 'White';
+			trickTest = new Trick(Rects[i][j].x + rectSize/2,Rects[i][j].y + rectSize/2,colorTricks,i,j,true);
+			WhiteTricks[i][jTrick] = trickTest;
+			ctx.fillStyle = trickTest.colorTrick;
+			ctx.beginPath();
+			ctx.arc(trickTest.centerX,trickTest.centerY,radius,0, 2 * Math.PI,true);
+			ctx.fill();
+			newMapTricksAndRectan.set(Rects[i][j],WhiteTricks[i][jTrick]);
+			Rects[i][j].empty = false;
+			jTrick++;
+		}
+	}
+}
+
+var Redraw = function(){
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	drawRect();
+	drawTricksBlack();
+	drawTricksWhite();
+	if (quantityBlack == 0){
+		alert("White WIN!!");
+	} else if (quantityWhite == 0){
+		alert("Black WIN!!");
+	}
+	click = false;
+};
+
+quantityBlack = 0;
+quantityWhite =  0;
+var drawTricksBlack = function(){
+	for (var i= 0; i < 3; i++){
+		for(var j = 0; j < fieldSize/2;j++){
+			if(BlackTricks[i][j].visible == true){
+				ctx.fillStyle = 'Black';
+				ctx.beginPath();
+				ctx.arc(BlackTricks[i][j].centerX,BlackTricks[i][j].centerY,radius,0, 2 * Math.PI,true);
+				ctx.fill();
+				Rects[BlackTricks[i][j].i][BlackTricks[i][j].j].empty = false;
+				quantityBlack ++;
+			}
+		}
+	}
+};
+
+
+var drawTricksWhite = function(){
+
+for (var i= 5; i < 8; i++){
+	for(var j = 0; j < fieldSize/2;j++){
+		if(WhiteTricks[i][j].visible == true){
+			ctx.fillStyle = 'White';
+			ctx.beginPath();
+			ctx.arc(WhiteTricks[i][j].centerX,WhiteTricks[i][j].centerY,radius,0, 2 * Math.PI,true);
+			ctx.fill();
+			Rects[WhiteTricks[i][j].i][WhiteTricks[i][j].j].empty = false;
+			console.log(Rects[WhiteTricks[i][j].i][WhiteTricks[i][j].j]);
+			quantityWhite ++;
+		}
+	}
+}
+};
+
+var iOfTricks,jOfTricks;
+
+var getDistanceBl = function(event){
+	var arr = [];
+	var number = 0;
+	for (var i= 0; i < 3; i++){
+		for(var j = 0; j < 4;j++){
+			if(BlackTricks[i][j].visible == true){
+			var X = event.offsetX - BlackTricks[i][j].centerX;
+			var Y = event.offsetY - BlackTricks[i][j].centerY;
+			value = Math.sqrt((X*X) + (Y*Y));
+			if (value <= radius){
+				iOfTricks = i;
+				jOfTricks = j;
+				return value;
+			}
+			arr[number] = value;
+			number++;
+			}
+		}
+	}
+};
+
+var getDistanceWt = function(event){
+	var arr = [];
+	var number = 0;
+	for (var i= 5; i < 8; i++){
+		for(var j = 0; j < 4;j++){
+			if(WhiteTricks[i][j].visible == true){
+			var X = event.offsetX - WhiteTricks[i][j].centerX;
+			var Y = event.offsetY - WhiteTricks[i][j].centerY;
+			value = Math.sqrt((X*X) + (Y*Y));
+			if (value <= radius){
+				iOfTricks = i;
+				jOfTricks = j;
+				return value;
+			}
+			arr[number] = value;
+			number++;
+			}
+		}	
+	}
+};
+
+var iOfRect, jOfRect;
+
+var getDistanseRect = function (event){
+	var arr = [];
+	var number = 0;
+	for (var i= 0; i < 8; i++){
+		for(var j = 0; j < 8;j++){
+			var X = event.offsetX - (Rects[i][j].x + rectSize/2);
+			var Y = event.offsetY - (Rects[i][j].y + rectSize/2);
+			value = Math.sqrt((X*X) + (Y*Y));
+			if (value <= rectSize/2){
+				iOfRect = i;
+				jOfRect = j;
+				return value;
+			}
+			arr[number] = value;
+			number++;
+		}
+	}
+
+};
+
+var ReckJ;
+var ReckI;
+
+var isItEnpty = function(Trick){
+		t = Trick;
+		if (t.colorTrick == 'Black'){
+			
+			if (t.j == 7 ) {
+				if (Rects[t.i+1][t.j-1].empty == true ) {
+					ReckI = t.i+1;
+					ReckJ = t.j;
+					return 2;}
+			else return 0;
+			}
+			if (t.j == 0 ){
+				if ( Rects[t.i+1][t.j+1].empty == true){
+					ReckI = t.i+1;
+					ReckJ = t.j;
+					return 3;} 
+			else return 0;
+			}
+			
+			if(Rects[t.i+1][t.j+1].empty == true && Rects[t.i+1][t.j-1].empty == true) {
+				ReckI = t.i+1;
+				ReckJ = t.j;
+				return 1;
+			} else if (Rects[t.i+1][t.j-1].empty == true){
+				ReckI = t.i+1;
+				ReckJ = t.j;
+				return 2;
+			}else if (Rects[t.i+1][t.j+1].empty == true) {
+				ReckI = t.i+1;
+				ReckJ = t.j;
+				return 3;
+			}
+	} else if (t.colorTrick == 'White' ) {
+			if (t.j == 7 ) {
+				if (Rects[t.i-1][t.j-1].empty == true ) {
+					ReckI = t.i-1;
+					ReckJ = t.j;
+					return 2;}
+			else return 0;
+			}
+			if (t.j == 0 ){
+				if ( Rects[t.i-1][t.j+1].empty == true){
+					ReckI = t.i-1;
+					ReckJ = t.j;
+					return 3;} 
+			else return 0;
+			}
+			if(Rects[t.i-1][t.j+1].empty == true && Rects[t.i-1][t.j-1].empty == true) {
+				ReckI = t.i-1;
+				ReckJ = t.j;
+				return 1;
+			} else if (Rects[t.i-1][t.j-1].empty == true){
+				ReckI = t.i-1;
+				ReckJ = t.j;
+				return 2;
+			}else if (Rects[t.i-1][t.j+1].empty == true) {
+				ReckI = t.i-1;
+				ReckJ = t.j;
+				return 3;
+			}
+		} 
+			
+		
+	return 0;
+	
+};
+var checkRecks = function(){
+	for (var i = 0;i <fieldSize;i++){
+		for (var j = 0; j< fieldSize;j++){
+			if (Rects[i][j].color == 'Blue')
+			return false;
+		}
+	}
+	return true;
+}
+var check = 'Black';
+click = false;
+$("canvas").click( function(event) {
+	var distanse = getDistanceBl (event);
+	var distanseWt = getDistanceWt (event);
+
+	console.log(distanse);
+	console.log(distanseWt);
+	console.log(iOfTricks);
+	console.log(jOfTricks);
+	
+	if (distanse <=radius ){
+		BlackTricks[iOfTricks][jOfTricks].colorTrick = 'Black';
+		console.log(BlackTricks[iOfTricks][jOfTricks].colorTrick);
+		console.log(isItEnpty(BlackTricks[iOfTricks][jOfTricks]));
+		if ( isItEnpty(BlackTricks[iOfTricks][jOfTricks]) == 1 && check == 'White'){
+			
+			if (checkRecks() == false){
+				Redraw();
+			}
+			
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+			
+			$("canvas").click( function(event) {
+				
+				if (check == 'White'){
+			var RectDistanse = getDistanseRect(event);
+				if(Rects[iOfRect][jOfRect].color == 'Blue'){
+						if (ReckJ + 1 == jOfRect){
+							BlackTricks[iOfTricks][jOfTricks].centerX +=rectSize;
+							BlackTricks[iOfTricks][jOfTricks].centerY+=rectSize;
+							newMapTricksAndRectan.delete(Rects[BlackTricks[iOfTricks][jOfTricks].i][BlackTricks[iOfTricks][jOfTricks].j]);
+							BlackTricks[iOfTricks][jOfTricks].i++;
+							BlackTricks[iOfTricks][jOfTricks].j++;
+							Rects[ReckI][ReckJ + 1].color = 'Gray';
+							if (ReckJ !=0)
+							Rects[ReckI][ReckJ - 1].color = 'Gray';
+							Rects[ReckI][ReckJ + 1].empty = false;
+							newMapTricksAndRectan.set(Rects[BlackTricks[iOfTricks][jOfTricks].i][BlackTricks[iOfTricks][jOfTricks].j],BlackTricks[iOfTricks][jOfTricks]);
+							Redraw();
+							check = 'Black';
+						}else if (ReckJ - 1 == jOfRect){
+							BlackTricks[iOfTricks][jOfTricks].centerX -=rectSize;
+							BlackTricks[iOfTricks][jOfTricks].centerY+=rectSize;
+							newMapTricksAndRectan.delete(Rects[BlackTricks[iOfTricks][jOfTricks].i][BlackTricks[iOfTricks][jOfTricks].j]);
+							BlackTricks[iOfTricks][jOfTricks].i++;
+							BlackTricks[iOfTricks][jOfTricks].j--;
+							if (ReckJ !=7)
+							Rects[ReckI][ReckJ + 1].color = 'Gray';
+							Rects[ReckI][ReckJ - 1].color = 'Gray';
+							Rects[ReckI][ReckJ - 1].empty = false;
+							console.log(ReckI,ReckJ - 1);
+							newMapTricksAndRectan.set(Rects[ReckI][ReckJ - 1],BlackTricks[iOfTricks][jOfTricks]);
+							alert(BlackTricks[iOfTricks][jOfTricks].j);
+							alert(newMapTricksAndRectan.get(Rects[BlackTricks[iOfTricks][jOfTricks].i][BlackTricks[iOfTricks][jOfTricks].j]));
+							Redraw();
+							check = 'Black';
+				}}
+					
+				
+				if(Rects[iOfRect][jOfRect].color == 'Red'){
+					alert(ReckJ);
+					alert(jOfRect);
+						if (ReckJ + 2 == jOfRect || (ReckJ + 1 == jOfRect)){
+							alert(10);
+							BlackTricks[iOfTricks][jOfTricks].centerX +=2*rectSize;
+							BlackTricks[iOfTricks][jOfTricks].centerY+=2*rectSize;
+							BlackTricks[iOfTricks][jOfTricks].i+=2;
+							BlackTricks[iOfTricks][jOfTricks].j+=2;
+							WhiteTricks[tempi][tempj].visible = false;
+							Redraw();
+							check = 'Black';
+						}else if (ReckJ - 2 == jOfRect || (ReckJ - 1 == jOfRect)){
+							alert(10);
+							BlackTricks[iOfTricks][jOfTricks].centerX -=2*rectSize;
+							BlackTricks[iOfTricks][jOfTricks].centerY+=2*rectSize;
+							BlackTricks[iOfTricks][jOfTricks].i+=2;
+							BlackTricks[iOfTricks][jOfTricks].j-=2;
+							WhiteTricks[tempi][tempj].visible = false;
+							Redraw();
+							check = 'Black';
+						} 
+				}
+			}
+			});
+		}
+		else if (isItEnpty(BlackTricks[iOfTricks][jOfTricks]) == 2 && check == 'White'){
+			if (checkRecks() == false){
+				Redraw();
+			}
+			temp = 0;
+			for (var i= 5; i < 8; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = WhiteTricks[i][j];
+						}
+					}
+			}
+			if(temp != 0){
+			if(temp.colorTrick == 'White'){
+				temp.colorTrick = 'Black';
+				
+				if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+					Rects[ReckI][ReckJ + 1].color = 'Red';
+					ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+					ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+					isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+			}else {
+				isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+					Rects[ReckI][ReckJ - 1].color = 'Blue';
+					ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+					ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+			
+			}else {
+				isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+					Rects[ReckI][ReckJ - 1].color = 'Blue';
+					ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+					ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+
+			}else {isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+					Rects[ReckI][ReckJ - 1].color = 'Blue';
+					ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+					ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+
+		} else if (isItEnpty(BlackTricks[iOfTricks][jOfTricks]) == 3 && check == 'White'){
+			if (checkRecks() == false){
+				Redraw();
+			}
+			temp = 0;
+			for (var i= 5; i < 8; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j - 1){
+							tempi = i;
+							tempj = j;
+							temp = WhiteTricks[i][j];
+						}
+					}
+			}
+			if(temp != 0){
+				if(temp.colorTrick == 'White'){
+					temp.colorTrick = 'Black';			
+					if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+						Rects[ReckI][ReckJ - 1].color = 'Red';
+						ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+						ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+						isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+			}else {
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = BlackTricks[iOfTricks][jOfTricks].colorTrick;} 
+		} else {
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = BlackTricks[iOfTricks][jOfTricks].colorTrick;}
+} else {
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = BlackTricks[iOfTricks][jOfTricks].colorTrick;}
+
+	} else if (isItEnpty(BlackTricks[iOfTricks][jOfTricks]) == 0 && check == 'White'){
+		if (checkRecks() == false){
+				Redraw();
+			}
+			alert(iOfTricks);
+					alert(jOfTricks);
+			temp = 0;
+			alert();
+		for (var i= 5; i < 8; i++){
+			for(var j = 0; j < fieldSize/2;j++){
+				if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j - 1){
+					tempi = i;
+					tempj = j;
+					temp = WhiteTricks[i][j];
+				}
+			}
+		}
+		if (temp == 0){
+			alert(1);
+			for (var i= 5; i < 8; i++){
+				
+					for(var j = 0; j < fieldSize/2;j++){
+						if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = WhiteTricks[i][j];
+							
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'White'){
+						temp.colorTrick = 'Black';		
+						if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+							Rects[ReckI][ReckJ + 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+							isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+						}
+			alert(temp.colorTrick);					}
+		} else {
+			if(temp.colorTrick == 'White'){
+				alert(8);
+					temp.colorTrick = 'Black';			
+					if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+						Rects[ReckI][ReckJ - 1].color = 'Red';
+						ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+						ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			            isItEnpty(BlackTricks[iOfTricks][jOfTricks]);
+						alert(iOfTricks);
+					alert(jOfTricks);
+					} else {
+						for (var i= 5; i < 8; i++){
+				
+					for(var j = 0; j < fieldSize/2;j++){
+						if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = WhiteTricks[i][j];
+							
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'White'){
+						temp.colorTrick = 'Black';		
+						if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+							Rects[ReckI][ReckJ + 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+							isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+						}
+			alert(temp.colorTrick);					}
+					}
+			} else {
+				for (var i= 5; i < 8; i++){
+				
+					for(var j = 0; j < fieldSize/2;j++){
+						if (WhiteTricks[i][j].i == BlackTricks[iOfTricks][jOfTricks].i + 1 && WhiteTricks[i][j].j == BlackTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = WhiteTricks[i][j];
+							
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'White'){
+						temp.colorTrick = 'Black';		
+						if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+							Rects[ReckI][ReckJ + 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+							isItEnpty(BlackTricks[iOfTricks][jOfTricks]);}
+						}
+			alert(temp.colorTrick);					}
+			}
+		}
+			
+		
+	}
+	
+	
+	} else if (distanseWt<=radius ){
+		WhiteTricks[iOfTricks][jOfTricks].colorTrick = 'White';
+		console.log(WhiteTricks[iOfTricks][jOfTricks].colorTrick);
+		console.log(isItEnpty(WhiteTricks[iOfTricks][jOfTricks]));
+		
+		
+		if (isItEnpty(WhiteTricks[iOfTricks][jOfTricks]) == 1 && check == 'Black'){
+			
+			if (checkRecks() == false){
+				Redraw();
+			}
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+			$("canvas").click( function(event) {
+				if (check == 'Black'){
+			var RectDistanse = getDistanseRect(event);
+			
+				if(Rects[iOfRect][jOfRect].color == 'Blue'){
+					
+					if (ReckJ + 1 == jOfRect){
+						
+							WhiteTricks[iOfTricks][jOfTricks].centerX +=rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].centerY-=rectSize;
+							newMapTricksAndRectan.delete(Rects[WhiteTricks[iOfTricks][jOfTricks].i][WhiteTricks[iOfTricks][jOfTricks].j]);
+							WhiteTricks[iOfTricks][jOfTricks].i--;
+							WhiteTricks[iOfTricks][jOfTricks].j++;
+							Rects[ReckI][ReckJ + 1].color = 'Gray';
+							if (ReckJ != 0)
+							Rects[ReckI][ReckJ - 1].color = 'Gray';
+							Rects[ReckI][ReckJ + 1].empty = false;
+							newMapTricksAndRectan.set(Rects[WhiteTricks[iOfTricks][jOfTricks].i][WhiteTricks[iOfTricks][jOfTricks].j],WhiteTricks[iOfTricks][jOfTricks]);
+							
+							Redraw();							
+							check = 'White';
+						}else if (ReckJ - 1 == jOfRect){
+							WhiteTricks[iOfTricks][jOfTricks].centerX -=rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].centerY-=rectSize;
+							newMapTricksAndRectan.delete(Rects[WhiteTricks[iOfTricks][jOfTricks].i][WhiteTricks[iOfTricks][jOfTricks].j]);
+							WhiteTricks[iOfTricks][jOfTricks].i--;
+							WhiteTricks[iOfTricks][jOfTricks].j--;
+							if (ReckJ!=7)
+							Rects[ReckI][ReckJ + 1].color = 'Gray';
+							if (ReckJ != 0)
+							Rects[ReckI][ReckJ - 1].color = 'Gray';
+							Rects[ReckI][ReckJ - 1].empty = false;
+							newMapTricksAndRectan.set(Rects[WhiteTricks[iOfTricks][jOfTricks].i][WhiteTricks[iOfTricks][jOfTricks].j],WhiteTricks[iOfTricks][jOfTricks]);
+							Redraw();
+							check = 'White';
+						}
+				}
+				if(Rects[iOfRect][jOfRect].color == 'Red'){
+					
+						if (ReckJ + 2 == jOfRect || ReckJ + 1 == jOfRect){
+							WhiteTricks[iOfTricks][jOfTricks].centerX +=2*rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].centerY-=2*rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].i-=2;
+							WhiteTricks[iOfTricks][jOfTricks].j+=2;
+							BlackTricks[tempi][tempj].visible = false;
+							console.log(ReckI);
+							console.log(ReckJ);
+							
+							Redraw();
+							check = 'White';
+						}else if (ReckJ - 2 == jOfRect || ReckJ - 1 == jOfRect){
+							WhiteTricks[iOfTricks][jOfTricks].centerX -=2*rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].centerY-=2*rectSize;
+							WhiteTricks[iOfTricks][jOfTricks].i-=2;
+							WhiteTricks[iOfTricks][jOfTricks].j-=2;
+							BlackTricks[tempi][tempj].visible = false;
+							
+							Redraw();
+							check = 'White';
+						} 
+				}
+				
+				
+				}});
+		} else if (isItEnpty(WhiteTricks[iOfTricks][jOfTricks]) == 2 && check == 'Black'){
+			if (checkRecks() == false){
+				Redraw();
+			}
+			
+			
+			temp = 0;
+			for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+			if(temp != 0 ){
+				if(tempj !=6){
+					if(temp.colorTrick == 'Black'){
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'Black';
+							Rects[ReckI][ReckJ + 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+						} 
+						else {
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+					}
+					else {
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+				}
+				else {
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+			}
+			else {
+			Rects[ReckI][ReckJ - 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+			
+			
+
+		} else if (isItEnpty(WhiteTricks[iOfTricks][jOfTricks]) == 3 && check == 'Black'){
+			if (checkRecks() == false){
+				Redraw();
+			}
+			
+			temp = 0;
+			for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j - 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+			alert(temp);
+			if(temp != 0 ){
+				
+					
+					if(temp.colorTrick == 'Black'){
+						
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'White';
+							Rects[ReckI][ReckJ - 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+						} 
+						else {
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+					}
+					else {
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}
+				}
+				else {
+			Rects[ReckI][ReckJ + 1].color = 'Blue';
+			ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+			ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+		ctx.fillStyle = WhiteTricks[iOfTricks][jOfTricks].colorTrick;}	
+		
+		}  else if (isItEnpty(WhiteTricks[iOfTricks][jOfTricks]) == 0 && check == 'Black'){
+		if (checkRecks() == false){
+				Redraw();
+			}
+			alert(iOfTricks);
+					alert(jOfTricks);
+			temp = 0;
+		//	alert();/////////////////////////////////////////////////////////////////////////////////////////////////////
+		for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j + 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+		if (temp == 0){
+			alert(1);
+			for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j - 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'Black'){
+						
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'White';
+							Rects[ReckI][ReckJ - 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+						} 				}
+		}} else {	
+					if(temp.colorTrick == 'Black'){
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 3 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'Black';
+							Rects[ReckI][ReckJ + 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ + 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ + 1].x,Rects[ReckI][ReckJ + 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+						}  else {
+						for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j - 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'Black'){
+						
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'White';
+							Rects[ReckI][ReckJ - 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+						} 				}
+		}
+					} }else {
+				for (var i= 0; i < 3; i++){
+					for(var j = 0; j < fieldSize/2;j++){
+						if (BlackTricks[i][j].i == WhiteTricks[iOfTricks][jOfTricks].i - 1 && BlackTricks[i][j].j == WhiteTricks[iOfTricks][jOfTricks].j - 1){
+							tempi = i;
+							tempj = j;
+							temp = BlackTricks[i][j];
+						}
+					}
+			}
+			
+				if(temp != 0){
+					if(temp.colorTrick == 'Black'){
+						
+						temp.colorTrick = 'White';
+						if(isItEnpty(temp) == 2 || isItEnpty(temp) == 1){
+							temp.colorTrick = 'White';
+							Rects[ReckI][ReckJ - 1].color = 'Red';
+							ctx.fillStyle = Rects[ReckI][ReckJ - 1].color;
+							ctx.fillRect(Rects[ReckI][ReckJ - 1].x,Rects[ReckI][ReckJ - 1].y,rectSize,rectSize);
+							isItEnpty(WhiteTricks[iOfTricks][jOfTricks]);
+							} 				
+						}
+					}
+			}
+		}
+			
+		
+	}
+	
+		
+		
+}
+	
+});
+var WhiteStep = function(){
+
+}
+
+
+
+</script>
+</body>
+</html>
